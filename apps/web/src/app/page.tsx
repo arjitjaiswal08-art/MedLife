@@ -217,7 +217,7 @@ export default function HomePage() {
 </div>
 <div className="md:col-span-5 relative reveal active" >
 <div className="relative w-full aspect-square glass-card rounded-[40px] overflow-hidden p-base">
-<img className="w-full h-full object-cover rounded-[36px]" data-alt="A high-end, professionally lit medical setting where a diverse doctor and a patient are reviewing high-tech diagnostic results on a holographic-style tablet. The environment is minimalist and clinical with soft, warm lighting. The aesthetic is clean and modern, incorporating soft blue and white tones to convey intelligence and empathy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn-Hjc9XTgMwn-RnFFP0lbIwTNySIl67L8MzBZL8d4l_wO6o1NHdS1QwkFpvbWObNaU5F_ctEad_VHbmUkqvBZu-unZpXadc-wUEIelRG__-S6RMFdTuN01UIiYrnsT2wgWXvFLHNER4vWIWJO7aOuQShNeQSUQXJoHHI4KFXbnI6sw9MsmGRiY7YGDhO1e8l2KitUThqdpvwLldQBZCvA6-51NdoSimxhHRwIzq9doDPVNPMsOKdIE5aukOHFLpFGToEUIujngoc"/>
+<img className="w-full h-full object-cover rounded-[36px]" alt="HealthCARE Mobile Application" src="/images/healthcare-app-hero.jpg"/>
 </div>
 
 <div className="absolute -bottom-6 -left-6 glass-card p-md rounded-2xl max-w-[240px] animate-bounce-slow">
@@ -242,7 +242,7 @@ export default function HomePage() {
 <p className="text-on-surface-variant font-body-md text-body-md">Advanced imaging and lab analysis coupled with AI-driven cross-referencing for unprecedented accuracy.</p>
 </div>
 <div className="mt-lg">
-<img className="w-full h-40 object-cover rounded-xl grayscale hover:grayscale-0 transition-all duration-500" data-alt="A macro shot of a modern medical diagnostic interface showing 3D biological models with clean typography and data visualizations. The lighting is focused and clinical, emphasizing professional precision. The color palette is composed of primary blue and neutral greys." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyeckwTE8337Zqtdtm-xW_PoYDQmlEskVMq3gQxiiqV8zBfVy9-qECl3Z2DGMoXRMHYWtgc0YDQ_USFuUZBYYnVUuo4c_gr2r0az3GyT-zlB2ebOsWhM7IwTnuciw1dN5oBvGF2LXlsgi3m9UVpjaipvuO7-5FQ0ukQJM-bWwHU-49MOylOOc7cPhNzvD8KjuCyoQikRAotgxF9Wrl7cg8ScrpoV9Ge5WROn-lpTR63ushSng4LM7MYXFP0QwzEmse4kGly27fyCk"/>
+<img className="w-full h-40 object-cover rounded-xl grayscale hover:grayscale-0 transition-all duration-500" alt="Clinical Diagnostics App Interface" src="/images/clinical-diagnostics-app.jpg"/>
 </div>
 </div>
 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-gutter h-full">
