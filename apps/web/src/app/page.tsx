@@ -12,8 +12,8 @@ export default function HomePage() {
     visitType: 'in-person',
     date: 'Today, Available Now',
     time: '04:30 PM - 05:00 PM',
-    patientName: 'Arjit Jaiswal',
-    patientPhone: '+91 98765 43210',
+    patientName: '',
+    patientPhone: '',
     notes: '',
     bookingId: '',
   });
@@ -23,7 +23,7 @@ export default function HomePage() {
     { sender: 'bot', text: 'Hello! I am Dr. Meera from MedLife Clinical Care. How can I assist you with doctor booking, medical triage, or clinic guidance today?', time: 'Just now' }
   ]);
   const [repInput, setRepInput] = useState('');
-  const [callbackPhone, setCallbackPhone] = useState('+91 98765 43210');
+  const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackRequested, setCallbackRequested] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
@@ -80,6 +80,25 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    // Prefill patient name & phone from active logged-in user if available
+    try {
+      const uStr = localStorage.getItem('user');
+      if (uStr) {
+        const u = JSON.parse(uStr);
+        if (u.display_name && u.display_name !== 'Arjit Jaiswal' && u.display_name !== 'Patient User') {
+          setAppointmentData(prev => ({ ...prev, patientName: u.display_name }));
+        }
+      }
+      const profStr = localStorage.getItem('medlife_profile');
+      if (profStr) {
+        const p = JSON.parse(profStr);
+        if (p.phone_number && p.phone_number !== '+91 98765 43210') {
+          setAppointmentData(prev => ({ ...prev, patientPhone: p.phone_number }));
+          setCallbackPhone(p.phone_number);
+        }
+      }
+    } catch {}
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -508,7 +527,7 @@ export default function HomePage() {
                         required
                         value={appointmentData.patientName}
                         onChange={e => setAppointmentData({ ...appointmentData, patientName: e.target.value })}
-                        placeholder="e.g. Arjit Jaiswal"
+                        placeholder="e.g. John Miller"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       />
                     </div>
@@ -521,7 +540,7 @@ export default function HomePage() {
                         required
                         value={appointmentData.patientPhone}
                         onChange={e => setAppointmentData({ ...appointmentData, patientPhone: e.target.value })}
-                        placeholder="+91 98765 43210"
+                        placeholder="e.g. +1 (555) 234-5678"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       />
                     </div>
@@ -766,7 +785,7 @@ export default function HomePage() {
                           type="tel"
                           value={callbackPhone}
                           onChange={e => setCallbackPhone(e.target.value)}
-                          placeholder="+91 98765 43210"
+                          placeholder="e.g. +1 (555) 234-5678"
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                       </div>
