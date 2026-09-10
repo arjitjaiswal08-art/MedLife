@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { usersService } from '@/services/api'
 
 interface ProfileData { 
   display_name: string; 
@@ -69,17 +70,19 @@ export default function ProfilePage() {
   
   // Profile & Medical ID
   const [profile, setProfile] = useState<ProfileData>({ 
-    display_name: 'Arjit Jaiswal', 
-    email: 'arjit.jaiswal@medlife.org', 
-    phone_number: '+91 98765 43210', 
+    display_name: 'Patient User', 
+    email: 'patient@example.com', 
+    phone_number: '', 
     default_city: 'Chennai',
-    blood_group: 'O+',
-    allergies: 'Penicillin, Seasonal Pollen',
-    chronic_conditions: 'None reported',
-    emergency_contact_name: 'Dr. S. K. Jaiswal (Father)',
-    emergency_contact_phone: '+91 98765 11223',
-    preferred_hospital: 'Apollo Speciality Hospitals, Greams Road'
+    blood_group: '',
+    allergies: '',
+    chronic_conditions: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    preferred_hospital: ''
   })
+  const [isNewUser, setIsNewUser] = useState(false)
+  const [isGuest, setIsGuest] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isEditingMedical, setIsEditingMedical] = useState(false)
@@ -178,24 +181,161 @@ export default function ProfilePage() {
   }, [])
 
   useEffect(() => {
-    const sp = localStorage.getItem('medlife_profile')
-    if (sp) { try { setProfile(prev => ({ ...prev, ...JSON.parse(sp) })) } catch {} }
-    const spref = localStorage.getItem('medlife_prefs')
-    if (spref) { try { setPrefs(prev => ({ ...prev, ...JSON.parse(spref) })) } catch {} }
-    const sa = localStorage.getItem('medlife_avatar')
-    if (sa) setAvatarUrl(sa)
-    const sHist = localStorage.getItem('medlife_search_history')
-    if (sHist) { try { setHistory(JSON.parse(sHist)) } catch {} }
-    setLoading(false)
+    async function initUser() {
+      // 1. Check if user is in localStorage (set immediately by signup or login)
+      let activeEmail = ''
+      let activeName = ''
+
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr)
+          if (u.email) activeEmail = u.email.trim()
+          if (u.display_name) activeName = u.display_name.trim()
+        } catch {}
+      }
+
+      // 2. If token exists, also attempt to fetch backend profile
+      const token = localStorage.getItem('access_token')
+      if (token && !token.startsWith('local_token_')) {
+        try {
+          const res = await usersService.getProfile()
+          if (res.data?.email) {
+            activeEmail = res.data.email
+            if (res.data.display_name) activeName = res.data.display_name
+          }
+        } catch {}
+      }
+
+      // 3. If there is an active logged-in / newly signed-up user:
+      if (activeEmail) {
+        setIsGuest(false)
+        const userProfileKey = `medlife_profile_${activeEmail}`
+        const savedUserProfile = localStorage.getItem(userProfileKey)
+        const savedGlobalProfile = localStorage.getItem('medlife_profile')
+
+        let targetProfile: ProfileData = {
+          display_name: activeName || activeEmail.split('@')[0],
+          email: activeEmail,
+          phone_number: '',
+          default_city: 'Chennai',
+          blood_group: '',
+          allergies: '',
+          chronic_conditions: '',
+          emergency_contact_name: '',
+          emergency_contact_phone: '',
+          preferred_hospital: ''
+        }
+
+        if (savedUserProfile) {
+          try {
+            const parsed = JSON.parse(savedUserProfile)
+            targetProfile = { ...targetProfile, ...parsed, email: activeEmail }
+          } catch {}
+        } else if (savedGlobalProfile) {
+          try {
+            const parsed = JSON.parse(savedGlobalProfile)
+            // Only use global profile if the email matches!
+            if (parsed.email === activeEmail) {
+              targetProfile = { ...targetProfile, ...parsed, email: activeEmail }
+            }
+          } catch {}
+        }
+
+        if (activeName) targetProfile.display_name = activeName
+        setProfile(targetProfile)
+        localStorage.setItem('medlife_profile', JSON.stringify(targetProfile))
+
+        // Check if user is newly registered (empty medical ID or fresh account)
+        if (!targetProfile.blood_group && !targetProfile.phone_number) {
+          setIsNewUser(true)
+        } else {
+          setIsNewUser(false)
+        }
+
+        // Load user-specific search history
+        const userHistKey = `medlife_history_${activeEmail}`
+        const userHist = localStorage.getItem(userHistKey)
+        if (userHist) {
+          try { setHistory(JSON.parse(userHist)) } catch { setHistory([]) }
+        } else {
+          // A newly signed-up user starts with a clean slate (0 searches)
+          setHistory([])
+        }
+
+        // Load user-specific saved places
+        const userSavedKey = `medlife_saved_${activeEmail}`
+        const userSaved = localStorage.getItem(userSavedKey)
+        if (userSaved) {
+          try { setSavedPlaces(JSON.parse(userSaved)) } catch {}
+        } else {
+          // Fresh user has 0 saved places
+          setSavedPlaces([])
+        }
+
+        const userAvatarKey = `medlife_avatar_${activeEmail}`
+        const userAvatar = localStorage.getItem(userAvatarKey) || localStorage.getItem('medlife_avatar')
+        if (userAvatar && userAvatar.startsWith('data:image')) {
+          setAvatarUrl(userAvatar)
+        } else {
+          setAvatarUrl(null)
+        }
+      } else {
+        // 4. Guest / Demo user (unauthenticated visit)
+        setIsGuest(true)
+        setIsNewUser(false)
+        const sp = localStorage.getItem('medlife_profile')
+        if (sp) {
+          try { setProfile(prev => ({ ...prev, ...JSON.parse(sp) })) } catch {}
+        } else {
+          setProfile({
+            display_name: 'Guest Patient',
+            email: 'guest@medlife.org',
+            phone_number: '+91 98765 43210',
+            default_city: 'Chennai',
+            blood_group: 'O+',
+            allergies: 'Penicillin',
+            chronic_conditions: 'None',
+            emergency_contact_name: 'Emergency Services (108)',
+            emergency_contact_phone: '108',
+            preferred_hospital: 'Apollo Speciality Hospital'
+          })
+        }
+
+        const sHist = localStorage.getItem('medlife_search_history')
+        if (sHist) {
+          try { setHistory(JSON.parse(sHist)) } catch {}
+        }
+      }
+
+      const spref = localStorage.getItem('medlife_prefs')
+      if (spref) { try { setPrefs(prev => ({ ...prev, ...JSON.parse(spref) })) } catch {} }
+      setLoading(false)
+    }
+
+    initUser()
   }, [])
 
   const handleSaveProfile = async () => {
     setSaving(true)
     await new Promise(r => setTimeout(r, 600))
     localStorage.setItem('medlife_profile', JSON.stringify(profile))
+    if (profile.email) {
+      localStorage.setItem(`medlife_profile_${profile.email}`, JSON.stringify(profile))
+    }
+    // Update user object in localStorage
+    const uStr = localStorage.getItem('user')
+    if (uStr) {
+      try {
+        const u = JSON.parse(uStr)
+        u.display_name = profile.display_name
+        localStorage.setItem('user', JSON.stringify(u))
+      } catch {}
+    }
     setSaving(false)
     setIsEditing(false)
     setIsEditingMedical(false)
+    setIsNewUser(false)
     toast('Profile & Medical ID updated successfully!')
   }
 
@@ -465,6 +605,26 @@ export default function ProfilePage() {
         </header>
 
         <main className="content">
+
+          {/* New User Welcome Banner */}
+          {isNewUser && (
+            <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)', border: '1.5px solid #bfdbfe', borderRadius: 22, padding: '16px 22px', marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, boxShadow: '0 4px 20px rgba(37,99,235,0.08)', animation: 'slideIn 0.3s ease' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontSize: 32 }}>🎉</span>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: '#1e3a8a' }}>
+                    Welcome to MedLife, {profile.display_name}!
+                  </div>
+                  <div style={{ fontSize: 13, color: '#2563eb', marginTop: 2 }}>
+                    Your new patient profile is live with <strong>{profile.email}</strong>. Customize your emergency medical card below.
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => { setIsEditingMedical(true); setTab('profile'); }} className="btn btn-primary" style={{ padding: '9px 18px', fontSize: 13 }}>
+                + Setup Emergency Health ID
+              </button>
+            </div>
+          )}
 
           {/* Hero Profile Card */}
           <div className="hero">
@@ -762,11 +922,19 @@ export default function ProfilePage() {
                   <Link href="/emergency" style={{ textDecoration: 'none' }}>
                     <button className="btn btn-danger"><span>🚨</span> Emergency SOS</button>
                   </Link>
+                  <Link href="/signup" style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-ghost" style={{ borderColor: '#3b82f6', color: '#2563eb', background: '#eff6ff' }}>
+                      <span>➕</span> Register New Account
+                    </button>
+                  </Link>
                   <button 
                     onClick={() => { 
                       localStorage.removeItem('access_token')
-                      toast('Signed out from current device', 'info')
-                      setTimeout(() => router.push('/login'), 600)
+                      localStorage.removeItem('refresh_token')
+                      localStorage.removeItem('user')
+                      localStorage.removeItem('medlife_profile')
+                      toast('Signed out! Ready for new user signup…', 'info')
+                      setTimeout(() => router.push('/signup'), 500)
                     }} 
                     className="btn btn-ghost" 
                     style={{ marginLeft: 'auto', color: '#ef4444' }}
