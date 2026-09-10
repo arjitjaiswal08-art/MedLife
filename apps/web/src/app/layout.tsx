@@ -17,12 +17,16 @@ export const metadata: Metadata = {
     description: 'Find the right doctor, right now.',
     type: 'website',
   },
+  verification: {
+    google: 'Efu7UiZwO3jCoGO_jkfuS-jzaZxXroSFyMMpKnI9JR8',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        <meta name="google-site-verification" content="Efu7UiZwO3jCoGO_jkfuS-jzaZxXroSFyMMpKnI9JR8" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
