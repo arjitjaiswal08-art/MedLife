@@ -4,10 +4,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@api_url",
-    "NEXT_PUBLIC_GOOGLE_MAPS_KEY": "@google_maps_key"
-  },
   "headers": [
     {
       "source": "/(.*)",
