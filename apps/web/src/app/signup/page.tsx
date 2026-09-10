@@ -23,7 +23,7 @@ export default function SignupPage() {
     setLoading(true)
     try {
       await signup(email, password, name)
-      router.push('/profile')
+      window.location.href = '/profile'
     } catch (e: any) {
       setError(e?.response?.data?.detail || 'Signup failed. Please try again.')
     } finally { 

@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await login(email, password)
-      router.push('/profile')
+      window.location.href = '/profile'
     } catch (e: any) {
       setError(e?.response?.data?.detail || 'Login failed. Check your credentials.')
     } finally { 

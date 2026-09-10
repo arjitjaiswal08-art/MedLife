@@ -96,7 +96,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData)
     localStorage.setItem('user', JSON.stringify(userData))
 
-    // Fresh profile for newly signed-up user
+    // Purge legacy profile data
+    localStorage.removeItem('medlife_profile')
+    localStorage.removeItem('medlife_avatar')
+
+    // Fresh clean profile for newly signed-up user
     const newProfile = {
       display_name: cleanName,
       email: cleanEmail,
@@ -112,8 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('medlife_profile', JSON.stringify(newProfile))
     localStorage.setItem(`medlife_profile_${cleanEmail}`, JSON.stringify(newProfile))
     localStorage.setItem(`medlife_history_${cleanEmail}`, JSON.stringify([]))
+    localStorage.setItem(`medlife_saved_${cleanEmail}`, JSON.stringify([]))
     localStorage.setItem('medlife_search_history', JSON.stringify([]))
-    localStorage.removeItem('medlife_avatar')
   }
 
   const logout = async () => {
@@ -123,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
     localStorage.removeItem('medlife_profile')
+    localStorage.removeItem('medlife_avatar')
     setUser(null)
   }
 

@@ -182,6 +182,26 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function initUser() {
+      // 0. Purge legacy hardcoded profiles from localStorage if lingering
+      const legacyProfile = localStorage.getItem('medlife_profile')
+      if (legacyProfile) {
+        try {
+          const parsed = JSON.parse(legacyProfile)
+          if (parsed.email === 'arjit.jaiswal@medlife.org' || parsed.email === 'patient@example.com') {
+            localStorage.removeItem('medlife_profile')
+          }
+        } catch {}
+      }
+      const legacyUser = localStorage.getItem('user')
+      if (legacyUser) {
+        try {
+          const parsed = JSON.parse(legacyUser)
+          if (parsed.email === 'arjit.jaiswal@medlife.org') {
+            localStorage.removeItem('user')
+          }
+        } catch {}
+      }
+
       // 1. Check if user is in localStorage (set immediately by signup or login)
       let activeEmail = ''
       let activeName = ''
@@ -190,7 +210,9 @@ export default function ProfilePage() {
       if (userStr) {
         try {
           const u = JSON.parse(userStr)
-          if (u.email) activeEmail = u.email.trim()
+          if (u.email && u.email !== 'arjit.jaiswal@medlife.org') {
+            activeEmail = u.email.trim()
+          }
           if (u.display_name) activeName = u.display_name.trim()
         } catch {}
       }
@@ -200,7 +222,7 @@ export default function ProfilePage() {
       if (token && !token.startsWith('local_token_')) {
         try {
           const res = await usersService.getProfile()
-          if (res.data?.email) {
+          if (res.data?.email && res.data.email !== 'arjit.jaiswal@medlife.org') {
             activeEmail = res.data.email
             if (res.data.display_name) activeName = res.data.display_name
           }
@@ -230,21 +252,25 @@ export default function ProfilePage() {
         if (savedUserProfile) {
           try {
             const parsed = JSON.parse(savedUserProfile)
-            targetProfile = { ...targetProfile, ...parsed, email: activeEmail }
+            if (parsed.email === activeEmail) {
+              targetProfile = { ...targetProfile, ...parsed }
+            }
           } catch {}
         } else if (savedGlobalProfile) {
           try {
             const parsed = JSON.parse(savedGlobalProfile)
             // Only use global profile if the email matches!
             if (parsed.email === activeEmail) {
-              targetProfile = { ...targetProfile, ...parsed, email: activeEmail }
+              targetProfile = { ...targetProfile, ...parsed }
             }
           } catch {}
         }
 
         if (activeName) targetProfile.display_name = activeName
+        targetProfile.email = activeEmail
         setProfile(targetProfile)
         localStorage.setItem('medlife_profile', JSON.stringify(targetProfile))
+        localStorage.setItem(userProfileKey, JSON.stringify(targetProfile))
 
         // Check if user is newly registered (empty medical ID or fresh account)
         if (!targetProfile.blood_group && !targetProfile.phone_number) {
@@ -281,31 +307,23 @@ export default function ProfilePage() {
           setAvatarUrl(null)
         }
       } else {
-        // 4. Guest / Demo user (unauthenticated visit)
+        // 4. Guest user (unauthenticated visit)
         setIsGuest(true)
         setIsNewUser(false)
-        const sp = localStorage.getItem('medlife_profile')
-        if (sp) {
-          try { setProfile(prev => ({ ...prev, ...JSON.parse(sp) })) } catch {}
-        } else {
-          setProfile({
-            display_name: 'Guest Patient',
-            email: 'guest@medlife.org',
-            phone_number: '+91 98765 43210',
-            default_city: 'Chennai',
-            blood_group: 'O+',
-            allergies: 'Penicillin',
-            chronic_conditions: 'None',
-            emergency_contact_name: 'Emergency Services (108)',
-            emergency_contact_phone: '108',
-            preferred_hospital: 'Apollo Speciality Hospital'
-          })
-        }
-
-        const sHist = localStorage.getItem('medlife_search_history')
-        if (sHist) {
-          try { setHistory(JSON.parse(sHist)) } catch {}
-        }
+        setProfile({
+          display_name: 'Guest Patient',
+          email: 'guest@medlife.org',
+          phone_number: '',
+          default_city: 'Chennai',
+          blood_group: '',
+          allergies: 'None reported',
+          chronic_conditions: 'None',
+          emergency_contact_name: '',
+          emergency_contact_phone: '',
+          preferred_hospital: ''
+        })
+        setHistory([])
+        setSavedPlaces([])
       }
 
       const spref = localStorage.getItem('medlife_prefs')
@@ -415,7 +433,13 @@ export default function ProfilePage() {
 
   const pwdLen = passwords.newPwd.length
   const pwdStrength = pwdLen === 0 ? null : pwdLen >= 12 ? { label: 'Strong', color: '#22c55e', pct: 100 } : pwdLen >= 8 ? { label: 'Medium', color: '#f97316', pct: 60 } : { label: 'Weak', color: '#ef4444', pct: 30 }
-  const initials = profile.display_name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'AJ'
+  const initials = (profile.display_name || profile.email || 'Patient')
+    .split(' ')
+    .map(w => w[0])
+    .filter(Boolean)
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'PT'
 
   const TABS = [
     { id: 'profile', label: 'Profile & Health ID', icon: '👤' },
@@ -626,6 +650,35 @@ export default function ProfilePage() {
             </div>
           )}
 
+          {/* Guest User Banner */}
+          {isGuest && (
+            <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: 22, padding: '16px 22px', marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, boxShadow: '0 4px 20px rgba(217,119,6,0.08)', animation: 'slideIn 0.3s ease' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontSize: 30 }}>👋</span>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: '#92400e' }}>
+                    You are browsing as a Guest
+                  </div>
+                  <div style={{ fontSize: 13, color: '#b45309', marginTop: 2 }}>
+                    Sign up to create your own verified health card, emergency ID, and clinical history.
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Link href="/signup" style={{ textDecoration: 'none' }}>
+                  <button className="btn btn-primary" style={{ padding: '9px 18px', fontSize: 13 }}>
+                    Create Account
+                  </button>
+                </Link>
+                <Link href="/login" style={{ textDecoration: 'none' }}>
+                  <button className="btn btn-ghost" style={{ padding: '9px 18px', fontSize: 13, border: '1px solid #d97706', color: '#92400e' }}>
+                    Sign In
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Hero Profile Card */}
           <div className="hero">
             <div className="avatar-wrap">
@@ -640,11 +693,11 @@ export default function ProfilePage() {
 
             <div className="hero-info">
               <div className="hero-badge">
-                <span>🛡️</span> Verified Patient • ID #{profile.blood_group ? `MED-${profile.blood_group}` : 'MED-USER'}
+                <span>🛡️</span> {isGuest ? 'Guest Session' : 'Verified Patient'} • ID #{profile.blood_group ? `MED-${profile.blood_group}` : 'MED-USER'}
               </div>
               <h1 className="hero-name">
                 {profile.display_name}
-                <span title="Verified identity" style={{ color: '#2563eb', fontSize: 18 }}>✓</span>
+                {!isGuest && <span title="Verified identity" style={{ color: '#2563eb', fontSize: 18 }}>✓</span>}
               </h1>
               <p className="hero-email">
                 <span>✉ {profile.email}</span>
@@ -933,8 +986,9 @@ export default function ProfilePage() {
                       localStorage.removeItem('refresh_token')
                       localStorage.removeItem('user')
                       localStorage.removeItem('medlife_profile')
+                      localStorage.removeItem('medlife_avatar')
                       toast('Signed out! Ready for new user signup…', 'info')
-                      setTimeout(() => router.push('/signup'), 500)
+                      setTimeout(() => { window.location.href = '/signup' }, 400)
                     }} 
                     className="btn btn-ghost" 
                     style={{ marginLeft: 'auto', color: '#ef4444' }}
