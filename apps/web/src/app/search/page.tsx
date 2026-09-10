@@ -55,7 +55,7 @@ export default function SearchPage() {
     if (!symptoms.trim()) return;
     setIsLoading(true);
     try {
-      const res = await symptomsService.analyze(symptoms);
+      const res = await symptomsService.analyze(symptoms, locationName);
       localStorage.setItem('lastAnalysis', JSON.stringify(res.data));
       if (userLocation) {
         localStorage.setItem('userLocation', JSON.stringify(userLocation));
@@ -64,8 +64,21 @@ export default function SearchPage() {
       }
       router.push('/results');
     } catch (error) {
-      console.error(error);
-      alert('Failed to analyze symptoms. Please try again.');
+      console.warn('API analyze failed, executing local triage engine...', error);
+      try {
+        const { analyzeSymptoms } = await import('@/lib/triage');
+        const fallbackData = await analyzeSymptoms(symptoms, locationName);
+        localStorage.setItem('lastAnalysis', JSON.stringify(fallbackData));
+        if (userLocation) {
+          localStorage.setItem('userLocation', JSON.stringify(userLocation));
+        } else {
+          localStorage.removeItem('userLocation');
+        }
+        router.push('/results');
+      } catch (innerErr) {
+        console.error('Complete triage failure:', innerErr);
+        alert('Could not analyze symptoms. Please check your connection and try again.');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,15 +1,47 @@
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'
+// Dynamically determine the correct API base URL
+export const getApiBaseUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL
+
+  if (typeof window !== 'undefined') {
+    const isLocal =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+
+    // If we have a custom remote backend configured (e.g. Render / Railway / API domain)
+    if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+      return envUrl
+    }
+
+    // When running on production, mobile phone, or without an external backend,
+    // use the robust built-in Next.js serverless API routes on the same origin.
+    if (!isLocal || !envUrl) {
+      return '/api/v1'
+    }
+  }
+
+  return envUrl || '/api/v1'
+}
 
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getApiBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 })
 
-// Attach JWT token from localStorage on every request
+// Attach JWT token from localStorage on every request & ensure non-localhost baseURL on mobile/prod
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
+    const isLocal =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+
+    // Guard against any stale localhost baseURL when on mobile or deployed domain
+    if (!isLocal && config.baseURL && (config.baseURL.includes('localhost') || config.baseURL.includes('127.0.0.1'))) {
+      config.baseURL = '/api/v1'
+    }
+
     const token = localStorage.getItem('access_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -18,17 +50,35 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Auto-refresh on 401
+// Auto-fallback on network error + Auto-refresh on 401
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
+
+    // 1. If connection to external API failed (Network Error, Mixed Content, or timeout),
+    // automatically fallback to the built-in Next.js /api/v1 routes!
+    if (
+      original &&
+      !original._fallbackRetry &&
+      typeof window !== 'undefined' &&
+      original.baseURL !== '/api/v1'
+    ) {
+      original._fallbackRetry = true
+      original.baseURL = '/api/v1'
+      console.warn('Backend connection failed; smoothly falling back to built-in HealthCARE API...')
+      return api(original)
+    }
+
+    // 2. Auto-refresh on 401
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
-          const res = await axios.post(`${API_URL}/auth/refresh`, { refresh_token: refreshToken })
+          const res = await axios.post(`${getApiBaseUrl()}/auth/refresh`, {
+            refresh_token: refreshToken,
+          })
           localStorage.setItem('access_token', res.data.access_token)
           original.headers.Authorization = `Bearer ${res.data.access_token}`
           return api(original)
@@ -58,7 +108,9 @@ export const placesService = {
     api.get(`/places/${placeId}`),
 
   route: (placeId: string, fromLat?: number, fromLng?: number) =>
-    api.get('/places/route', { params: { to_place_id: placeId, from_lat: fromLat, from_lng: fromLng } }),
+    api.get('/places/route', {
+      params: { to_place_id: placeId, from_lat: fromLat, from_lng: fromLng },
+    }),
 }
 
 export const feesService = {
