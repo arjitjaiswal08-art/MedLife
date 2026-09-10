@@ -258,7 +258,7 @@ export default function ResultsPage() {
             <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
               <span className="material-symbols-outlined text-white text-lg">medical_services</span>
             </div>
-            <span className="font-headline-sm text-headline-sm text-primary font-bold">MedLife</span>
+            <span className="font-headline-sm text-headline-sm text-primary font-bold">HealthCARE</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-primary/10 rounded-full transition-colors">
             <span className="material-symbols-outlined text-on-surface-variant">close</span>
@@ -310,7 +310,7 @@ export default function ResultsPage() {
               <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
                 <span className="material-symbols-outlined text-white text-base">medical_services</span>
               </div>
-              <span className="font-bold text-primary text-lg tracking-tight hidden sm:block">MedLife</span>
+              <span className="font-bold text-primary text-lg tracking-tight hidden sm:block">HealthCARE</span>
             </div>
           </div>
           <Link

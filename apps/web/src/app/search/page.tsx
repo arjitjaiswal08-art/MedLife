@@ -98,7 +98,7 @@ export default function SearchPage() {
             <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
               <span className="material-symbols-outlined text-white text-lg">medical_services</span>
             </div>
-            <span className="font-headline-sm text-headline-sm text-primary font-bold">MedLife</span>
+            <span className="font-headline-sm text-headline-sm text-primary font-bold">HealthCARE</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -179,7 +179,7 @@ export default function SearchPage() {
               <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
                 <span className="material-symbols-outlined text-white text-base">medical_services</span>
               </div>
-              <span className="font-bold text-primary text-lg tracking-tight hidden sm:block">MedLife</span>
+              <span className="font-bold text-primary text-lg tracking-tight hidden sm:block">HealthCARE</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export default function SearchPage() {
         {/* How It Works */}
         <section className="mt-16 entrance-anim stagger-1">
           <div className="mb-8 text-center">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface">How MedLife Works</h2>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface">How HealthCARE Works</h2>
             <p className="text-body-md text-on-surface-variant mt-2">Simple 3-step process to the right specialist</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

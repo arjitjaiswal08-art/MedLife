@@ -9,11 +9,11 @@ import { EmergencyProvider } from '@/store/EmergencyContext'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'MedLife — Precision Clinical Search',
+  title: 'HealthCARE — Precision Clinical Search',
   description: 'Find nearby doctors, hospitals, and clinics. AI-powered symptom analysis and emergency-aware medical search.',
   keywords: 'find doctor, nearby hospital, travel health, medical finder, emergency doctor',
   openGraph: {
-    title: 'MedLife — Precision Clinical Search',
+    title: 'HealthCARE — Precision Clinical Search',
     description: 'Find the right doctor, right now.',
     type: 'website',
   },

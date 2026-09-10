@@ -127,7 +127,7 @@ export default function ProfilePage() {
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([
     { id: 'p1', name: 'Apollo Speciality Hospital', type: 'Multi-Speciality & Emergency', address: '21 Greams Lane, Thousand Lights, Chennai', rating: 4.8, open24: true, distance: '1.8 km' },
     { id: 'p2', name: 'Fortis Malar Hospital', type: 'Cardiac & Neuro Care', address: '52 1st Main Rd, Gandhi Nagar, Adyar, Chennai', rating: 4.6, open24: true, distance: '4.2 km' },
-    { id: 'p3', name: 'MedLife Express Day Clinic', type: 'General Medicine & Diagnostic OPD', address: '14 Cathedral Road, Gopalapuram, Chennai', rating: 4.9, open24: false, distance: '0.9 km' }
+    { id: 'p3', name: 'HealthCARE Express Day Clinic', type: 'General Medicine & Diagnostic OPD', address: '14 Cathedral Road, Gopalapuram, Chennai', rating: 4.9, open24: false, distance: '0.9 km' }
   ])
 
   // History Data
@@ -413,14 +413,14 @@ export default function ProfilePage() {
       system_preferences: prefs, 
       clinical_history: history, 
       saved_facilities: savedPlaces,
-      generated_by: 'MedLife Clinical Intelligence',
+      generated_by: 'HealthCARE Clinical Intelligence',
       exported_at: new Date().toISOString() 
     }
     const blob = new Blob([JSON.stringify(dossier, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `medlife-dossier-${profile.display_name.replace(/\s+/g, '-').toLowerCase()}.json`
+    a.download = `healthcare-dossier-${profile.display_name.replace(/\s+/g, '-').toLowerCase()}.json`
     a.click()
     URL.revokeObjectURL(url)
     toast('Medical Dossier exported (JSON)!')
@@ -611,7 +611,7 @@ export default function ProfilePage() {
 
         {/* Top Navigation */}
         <header className="topbar">
-          <Link href="/" className="topbar-logo">MedLife</Link>
+          <Link href="/" className="topbar-logo">HealthCARE</Link>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: '#eff6ff', color: '#2563eb' }}>CLINICAL SUITE</span>
           <nav className="topbar-nav">
             <Link href="/" className="topbar-link">Home</Link>
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                 <span style={{ fontSize: 32 }}>🎉</span>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 16, color: '#1e3a8a' }}>
-                    Welcome to MedLife, {profile.display_name}!
+                    Welcome to HealthCARE, {profile.display_name}!
                   </div>
                   <div style={{ fontSize: 13, color: '#2563eb', marginTop: 2 }}>
                     Your new patient profile is live with <strong>{profile.email}</strong>. Customize your emergency medical card below.
@@ -1259,7 +1259,7 @@ export default function ProfilePage() {
                 <div className="card-header">
                   <div>
                     <div className="card-title">Active Devices & Sessions</div>
-                    <div className="card-desc">Manage computers and phones authorized to access MedLife</div>
+                    <div className="card-desc">Manage computers and phones authorized to access HealthCARE</div>
                   </div>
                   {sessions.length > 1 && (
                     <button 
@@ -1329,7 +1329,7 @@ export default function ProfilePage() {
                           const url = URL.createObjectURL(blob)
                           const a = document.createElement('a')
                           a.href = url
-                          a.download = 'medlife-search-history.json'
+                          a.download = 'healthcare-search-history.json'
                           a.click()
                           toast('Search history downloaded!')
                         }}
@@ -1497,7 +1497,7 @@ export default function ProfilePage() {
               <div style={{ padding: 18, background: 'linear-gradient(135deg, #1e293b, #0f172a)', color: 'white', borderRadius: 20, marginBottom: 20, position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#93c5fd', letterSpacing: '0.05em' }}>MEDLIFE DIGITAL HEALTH PASSPORT</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#93c5fd', letterSpacing: '0.05em' }}>HEALTHCARE DIGITAL HEALTH PASSPORT</div>
                     <div style={{ fontSize: 20, fontWeight: 800, marginTop: 2 }}>{profile.display_name}</div>
                   </div>
                   <div style={{ width: 42, height: 42, background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>
@@ -1533,7 +1533,7 @@ export default function ProfilePage() {
               {/* Quick Share Buttons */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
                 <a 
-                  href={`https://wa.me/?text=${encodeURIComponent(`Check out ${profile.display_name}'s MedLife Profile and Clinical ID: ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`Check out ${profile.display_name}'s HealthCARE Profile and Clinical ID: ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="btn btn-ghost" 
@@ -1542,7 +1542,7 @@ export default function ProfilePage() {
                   💬 WhatsApp
                 </a>
                 <a 
-                  href={`mailto:?subject=${encodeURIComponent(`${profile.display_name} - MedLife Patient Dossier`)}&body=${encodeURIComponent(`Here is my clinical profile link: ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
+                  href={`mailto:?subject=${encodeURIComponent(`${profile.display_name} - HealthCARE Patient Dossier`)}&body=${encodeURIComponent(`Here is my clinical profile link: ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
                   className="btn btn-ghost" 
                   style={{ justifyContent: 'center', fontSize: 12 }}
                 >

@@ -29,7 +29,7 @@ export default function EmergencyPage() {
 <button className="p-2 rounded-xl text-primary hover:bg-primary/5 transition-colors active:scale-95 duration-200">
 <span className="material-symbols-outlined" data-icon="menu">menu</span>
 </button>
-<span className="font-display-lg text-headline-md tracking-tight text-primary">MedLife</span>
+<span className="font-display-lg text-headline-md tracking-tight text-primary">HealthCARE</span>
 </div>
 <div className="flex items-center gap-2">
 <button className="p-2 rounded-xl text-on-surface-variant hover:bg-primary/5 transition-colors active:scale-95 duration-200">
@@ -172,7 +172,7 @@ export default function EmergencyPage() {
 
 <aside className="hidden fixed inset-y-0 left-0 w-72 z-50 bg-surface-container-lowest/90 backdrop-blur-2xl border-r border-white/20 shadow-[10px_0_50px_rgba(43,76,190,0.06)] flex flex-col p-md transform -translate-x-full transition-transform duration-300" id="side-nav">
 <div className="mb-lg">
-<h2 className="font-headline-md text-headline-md text-primary">MedLife Portal</h2>
+<h2 className="font-headline-md text-headline-md text-primary">HealthCARE Portal</h2>
 <p className="text-on-surface-variant font-label-lg">Clinical Dashboard</p>
 </div>
 <nav className="flex-1 space-y-2">
